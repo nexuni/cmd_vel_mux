@@ -34,14 +34,14 @@
  ** Ifdefs
  *****************************************************************************/
 
-#ifndef CMD_VEL_MUX__CMD_VEL_MUX_HPP_
-#define CMD_VEL_MUX__CMD_VEL_MUX_HPP_
+#ifndef ACKERMANN_CMD_MUX__ACKERMANN_CMD_MUX_HPP_
+#define ACKERMANN_CMD_MUX__ACKERMANN_CMD_MUX_HPP_
 
 /*****************************************************************************
  ** Includes
  *****************************************************************************/
 
-#include <geometry_msgs/msg/twist.hpp>
+#include <ackermann_msgs/msg/ackermann_drive_stamped.hpp>
 #include <rcl_interfaces/msg/set_parameters_result.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <std_msgs/msg/string.hpp>
@@ -55,11 +55,11 @@
 ** Namespaces
 *****************************************************************************/
 
-namespace cmd_vel_mux
+namespace ackermann_cmd_mux
 {
 
 /*****************************************************************************
- ** CmdVelMux
+ ** AckermannCmdMux
  *****************************************************************************/
 
 struct ParameterValues
@@ -84,22 +84,22 @@ bool operator==(const ParameterValues & parameters1, const ParameterValues & par
   return true;
 }
 
-class CmdVelMux final : public rclcpp::Node
+class AckermannCmdMux final : public rclcpp::Node
 {
 public:
-  explicit CmdVelMux(rclcpp::NodeOptions options);
-  ~CmdVelMux() override = default;
-  CmdVelMux(CmdVelMux && c) = delete;
-  CmdVelMux & operator=(CmdVelMux && c) = delete;
-  CmdVelMux(const CmdVelMux & c) = delete;
-  CmdVelMux & operator=(const CmdVelMux & c) = delete;
+  explicit AckermannCmdMux(rclcpp::NodeOptions options);
+  ~AckermannCmdMux() override = default;
+  AckermannCmdMux(AckermannCmdMux && c) = delete;
+  AckermannCmdMux & operator=(AckermannCmdMux && c) = delete;
+  AckermannCmdMux(const AckermannCmdMux & c) = delete;
+  AckermannCmdMux & operator=(const AckermannCmdMux & c) = delete;
 
 private:
   /// ID for "nobody" active input
   static const char * const VACANT;
 
   /// Multiplexed command velocity topic
-  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr output_topic_pub_;
+  rclcpp::Publisher<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr output_topic_pub_;
   /// Currently allowed cmd_vel subscriber
   rclcpp::Publisher<std_msgs::msg::String>::SharedPtr active_subscriber_pub_;
   rclcpp::node_interfaces::OnSetParametersCallbackHandle::SharedPtr param_cb_;
@@ -108,7 +108,7 @@ private:
 
   void timerCallback(const std::string & key);
   void cmdVelCallback(
-    const std::shared_ptr<geometry_msgs::msg::Twist> msg,
+    const std::shared_ptr<ackermann_msgs::msg::AckermannDriveStamped> msg,
     const std::string & key);
 
   rcl_interfaces::msg::SetParametersResult parameterUpdate(
@@ -127,7 +127,7 @@ private:
     std::string name_;
     ParameterValues values_;
     /// The subscriber itself
-    rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr sub_;
+    rclcpp::Subscription<ackermann_msgs::msg::AckermannDriveStamped>::SharedPtr sub_;
     /// No incoming messages timeout
     rclcpp::TimerBase::SharedPtr timer_;
   };
@@ -147,6 +147,6 @@ private:
   std::map<std::string, std::shared_ptr<CmdVelSub>> map_;
 };
 
-}  // namespace cmd_vel_mux
+}  // namespace ackermann_cmd_mux
 
-#endif  // CMD_VEL_MUX__CMD_VEL_MUX_HPP_
+#endif  // ACKERMANN_CMD_MUX__ACKERMANN_CMD_MUX_HPP_

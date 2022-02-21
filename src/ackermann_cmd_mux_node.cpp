@@ -30,7 +30,7 @@
 // ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include "cmd_vel_mux/cmd_vel_mux.hpp"
+#include "ackermann_cmd_mux/ackermann_cmd_mux.hpp"
 
 #include <rclcpp/rclcpp.hpp>
 
@@ -47,7 +47,7 @@ int main(int argc, char ** argv)
 
   // handle callbacks until shut down
   rclcpp::spin(
-    std::make_shared<cmd_vel_mux::CmdVelMux>(
+    std::make_shared<ackermann_cmd_mux::AckermannCmdMux>(
       rclcpp::NodeOptions()));
 
   rclcpp::shutdown();

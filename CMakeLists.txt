@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(cmd_vel_mux)
+project(ackermann_cmd_mux)
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
@@ -11,7 +11,7 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake_ros REQUIRED)
-find_package(geometry_msgs REQUIRED)
+find_package(ackermann_msgs REQUIRED)
 find_package(rcl_interfaces REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
@@ -21,9 +21,9 @@ find_package(std_msgs REQUIRED)
 include_directories(include)
 
 # Nodelet library
-add_library(${PROJECT_NAME} SHARED src/cmd_vel_mux.cpp)
+add_library(${PROJECT_NAME} SHARED src/ackermann_cmd_mux.cpp)
 ament_target_dependencies(${PROJECT_NAME}
-  geometry_msgs
+  ackermann_msgs
   rcl_interfaces
   rclcpp
   rclcpp_components
@@ -31,14 +31,14 @@ ament_target_dependencies(${PROJECT_NAME}
   std_msgs
 )
 
-add_executable(cmd_vel_mux_node src/cmd_vel_mux_node.cpp)
-ament_target_dependencies(cmd_vel_mux_node
+add_executable(ackermann_cmd_mux_node src/ackermann_cmd_mux_node.cpp)
+ament_target_dependencies(ackermann_cmd_mux_node
   rclcpp
 )
-target_link_libraries(cmd_vel_mux_node cmd_vel_mux)
+target_link_libraries(ackermann_cmd_mux_node ackermann_cmd_mux)
 
 rclcpp_components_register_nodes(${PROJECT_NAME}
-  "cmd_vel_mux::CmdVelMux")
+  "ackermann_cmd_mux::AckermannCmdMux")
 
 install(TARGETS ${PROJECT_NAME}
   ARCHIVE DESTINATION lib
@@ -48,29 +48,12 @@ install(TARGETS ${PROJECT_NAME}
 install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION include/${PROJECT_NAME}
 )
-install(TARGETS cmd_vel_mux_node
+install(TARGETS ackermann_cmd_mux_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
 install(DIRECTORY config launch
   DESTINATION share/${PROJECT_NAME}
 )
-
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
-
-  find_package(ros_testing REQUIRED)
-
-  add_ros_test(test/test_cmd_vel_mux.py
-    TARGET test_cmd_vel_mux
-    TIMEOUT 30
-  )
-
-  add_ros_test(test/test_cmd_vel_mux_updates.py
-    TARGET test_cmd_vel_mux_updates
-    TIMEOUT 30
-  )
-endif()
 
 ament_package()

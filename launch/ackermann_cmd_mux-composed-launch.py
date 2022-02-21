@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""Launch the cmd_vel_mux node composed with default configuration."""
+"""Launch the ackermann_cmd_mux node composed with default configuration."""
 
 import os
 
@@ -44,24 +44,24 @@ import yaml
 
 
 def generate_launch_description():
-    share_dir = ament_index_python.packages.get_package_share_directory('cmd_vel_mux')
+    share_dir = ament_index_python.packages.get_package_share_directory('ackermann_cmd_mux')
     # Passing parameters to a composed node must be done via a dictionary of
     # key -> value pairs.  Here we read in the data from the configuration file
     # and create a dictionary of it that the ComposableNode will accept.
-    params_file = os.path.join(share_dir, 'config', 'cmd_vel_mux_params.yaml')
+    params_file = os.path.join(share_dir, 'config', 'ackermann_cmd_mux_params.yaml')
     with open(params_file, 'r') as f:
-        params = yaml.safe_load(f)['cmd_vel_mux']['ros__parameters']
+        params = yaml.safe_load(f)['ackermann_cmd_mux']['ros__parameters']
 
     container = ComposableNodeContainer(
-        node_name='cmd_vel_mux_container',
+        node_name='ackermann_cmd_mux_container',
         node_namespace='',
         package='rclcpp_components',
         node_executable='component_container',
         composable_node_descriptions=[
             ComposableNode(
-                package='cmd_vel_mux',
-                node_plugin='cmd_vel_mux::CmdVelMux',
-                node_name='cmd_vel_mux',
+                package='ackermann_cmd_mux',
+                node_plugin='ackermann_cmd_mux::AckermannCmdMux',
+                node_name='ackermann_cmd_mux',
                 parameters=[params]
             ),
         ],

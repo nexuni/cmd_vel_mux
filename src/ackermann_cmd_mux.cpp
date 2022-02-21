@@ -34,9 +34,9 @@
  ** Includes
  *****************************************************************************/
 
-#include "cmd_vel_mux/cmd_vel_mux.hpp"
+#include "ackermann_cmd_mux/ackermann_cmd_mux.hpp"
 
-#include <geometry_msgs/msg/twist.hpp>
+#include <ackermann_msgs/msg/ackermann_drive_stamped.hpp>
 #include <rcl_interfaces/msg/set_parameters_result.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_components/register_node_macro.hpp>
@@ -59,16 +59,16 @@
 ** Namespaces
 *****************************************************************************/
 
-namespace cmd_vel_mux
+namespace ackermann_cmd_mux
 {
 
 /*****************************************************************************
  ** Implementation
  *****************************************************************************/
-const char * const CmdVelMux::VACANT = "empty";
+const char * const AckermannCmdMux::VACANT = "empty";
 
-CmdVelMux::CmdVelMux(rclcpp::NodeOptions options)
-: rclcpp::Node("cmd_vel_mux", options.allow_undeclared_parameters(
+AckermannCmdMux::AckermannCmdMux(rclcpp::NodeOptions options)
+: rclcpp::Node("ackermann_cmd_mux", options.allow_undeclared_parameters(
       true).automatically_declare_parameters_from_overrides(true)), allowed_(VACANT)
 {
   std::map<std::string, rclcpp::Parameter> parameters;
@@ -88,11 +88,11 @@ CmdVelMux::CmdVelMux(rclcpp::NodeOptions options)
   }
 
   param_cb_ =
-    add_on_set_parameters_callback(std::bind(&CmdVelMux::parameterUpdate, this,
+    add_on_set_parameters_callback(std::bind(&AckermannCmdMux::parameterUpdate, this,
       std::placeholders::_1));
 
-  output_topic_pub_ = this->create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
-  RCLCPP_DEBUG(get_logger(), "CmdVelMux : subscribe to output topic 'cmd_vel'");
+  output_topic_pub_ = this->create_publisher<ackermann_msgs::msg::AckermannDriveStamped>("cmd_vel", 10);
+  RCLCPP_DEBUG(get_logger(), "AckermannCmdMux : subscribe to output topic 'cmd_vel'");
 
   active_subscriber_pub_ = this->create_publisher<std_msgs::msg::String>(
     "active", rclcpp::QoS(1).transient_local());    // latched topic
@@ -102,10 +102,10 @@ CmdVelMux::CmdVelMux(rclcpp::NodeOptions options)
   active_msg->data = "idle";
   active_subscriber_pub_->publish(std::move(active_msg));
 
-  RCLCPP_DEBUG(get_logger(), "CmdVelMux : successfully initialized");
+  RCLCPP_DEBUG(get_logger(), "AckermannCmdMux : successfully initialized");
 }
 
-bool CmdVelMux::parametersAreValid(const std::map<std::string, ParameterValues> & parameters) const
+bool AckermannCmdMux::parametersAreValid(const std::map<std::string, ParameterValues> & parameters) const
 {
   std::set<int64_t> used_priorities;
 
@@ -137,7 +137,7 @@ bool CmdVelMux::parametersAreValid(const std::map<std::string, ParameterValues> 
   return true;
 }
 
-void CmdVelMux::configureFromParameters(const std::map<std::string, ParameterValues> & parameters)
+void AckermannCmdMux::configureFromParameters(const std::map<std::string, ParameterValues> & parameters)
 {
   std::map<std::string, std::shared_ptr<CmdVelSub>> new_map;
 
@@ -190,15 +190,15 @@ void CmdVelMux::configureFromParameters(const std::map<std::string, ParameterVal
     const std::string & key = m.first;
     const std::shared_ptr<CmdVelSub> & values = m.second;
     if (!values->sub_) {
-      values->sub_ = this->create_subscription<geometry_msgs::msg::Twist>(values->values_.topic, 10,
+      values->sub_ = this->create_subscription<ackermann_msgs::msg::AckermannDriveStamped>(values->values_.topic, 10,
           [this,
-          key](const geometry_msgs::msg::Twist::SharedPtr msg) {cmdVelCallback(msg, key);});
-      RCLCPP_DEBUG(get_logger(), "CmdVelMux : subscribed to '%s' on topic '%s'. pr: %d, to: %.2f",
+          key](const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg) {cmdVelCallback(msg, key);});
+      RCLCPP_DEBUG(get_logger(), "AckermannCmdMux : subscribed to '%s' on topic '%s'. pr: %d, to: %.2f",
         values->name_.c_str(), values->values_.topic.c_str(),
         values->values_.priority, values->values_.timeout);
     } else {
       RCLCPP_DEBUG(
-        get_logger(), "CmdVelMux : no need to re-subscribe to input topic '%s'",
+        get_logger(), "AckermannCmdMux : no need to re-subscribe to input topic '%s'",
         values->values_.topic.c_str());
     }
 
@@ -210,10 +210,10 @@ void CmdVelMux::configureFromParameters(const std::map<std::string, ParameterVal
     }
   }
 
-  RCLCPP_INFO(get_logger(), "CmdVelMux : (re)configured");
+  RCLCPP_INFO(get_logger(), "AckermannCmdMux : (re)configured");
 }
 
-bool CmdVelMux::addInputToParameterMap(
+bool AckermannCmdMux::addInputToParameterMap(
   std::map<std::string, ParameterValues> & parsed_parameters,
   const std::string & input_name,
   const std::string & parameter_name,
@@ -272,7 +272,7 @@ bool CmdVelMux::addInputToParameterMap(
   return true;
 }
 
-std::map<std::string, ParameterValues> CmdVelMux::parseFromParametersMap(
+std::map<std::string, ParameterValues> AckermannCmdMux::parseFromParametersMap(
   const std::map<std::string,
   rclcpp::Parameter> & parameters)
 {
@@ -298,8 +298,8 @@ std::map<std::string, ParameterValues> CmdVelMux::parseFromParametersMap(
   return parsed_parameters;
 }
 
-void CmdVelMux::cmdVelCallback(
-  const std::shared_ptr<geometry_msgs::msg::Twist> msg,
+void AckermannCmdMux::cmdVelCallback(
+  const std::shared_ptr<ackermann_msgs::msg::AckermannDriveStamped> msg,
   const std::string & key)
 {
   // if subscriber was deleted or the one being called right now just ignore
@@ -332,7 +332,7 @@ void CmdVelMux::cmdVelCallback(
 // The per-topic timerCallback is continually reset as cmd_vel messages are
 // received.  Thus, if it ever expires, then the topic hasn't published within
 // the specified timeout period and it should be removed.
-void CmdVelMux::timerCallback(const std::string & key)
+void AckermannCmdMux::timerCallback(const std::string & key)
 {
   if (allowed_ == key) {
     // No cmd_vel messages timeout happened to currently active source, so...
@@ -345,7 +345,7 @@ void CmdVelMux::timerCallback(const std::string & key)
   }
 }
 
-rcl_interfaces::msg::SetParametersResult CmdVelMux::parameterUpdate(
+rcl_interfaces::msg::SetParametersResult AckermannCmdMux::parameterUpdate(
   const std::vector<rclcpp::Parameter> & update_parameters)
 {
   rcl_interfaces::msg::SetParametersResult result;
@@ -404,6 +404,6 @@ rcl_interfaces::msg::SetParametersResult CmdVelMux::parameterUpdate(
   return result;
 }
 
-}  // namespace cmd_vel_mux
+}  // namespace ackermann_cmd_mux
 
-RCLCPP_COMPONENTS_REGISTER_NODE(cmd_vel_mux::CmdVelMux)
+RCLCPP_COMPONENTS_REGISTER_NODE(ackermann_cmd_mux::AckermannCmdMux)

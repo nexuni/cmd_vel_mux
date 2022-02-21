@@ -30,7 +30,7 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-"""Launch the cmd_vel_mux node with default configuration."""
+"""Launch the ackermann_cmd_mux node with default configuration."""
 
 import os
 
@@ -42,22 +42,22 @@ import yaml
 
 
 def generate_launch_description():
-    share_dir = ament_index_python.packages.get_package_share_directory('cmd_vel_mux')
+    share_dir = ament_index_python.packages.get_package_share_directory('ackermann_cmd_mux')
     # There are two different ways to pass parameters to a non-composed node;
     # either by specifying the path to the file containing the parameters, or by
     # passing a dictionary containing the key -> value pairs of the parameters.
     # When starting a *composed* node on the other hand, only the dictionary
     # style is supported.  To keep the code between the non-composed and
     # composed launch file similar, we use that style here as well.
-    params_file = os.path.join(share_dir, 'config', 'cmd_vel_mux_params.yaml')
+    params_file = os.path.join(share_dir, 'config', 'ackermann_cmd_mux_params.yaml')
     with open(params_file, 'r') as f:
-        params = yaml.safe_load(f)['cmd_vel_mux']['ros__parameters']
+        params = yaml.safe_load(f)['ackermann_cmd_mux']['ros__parameters']
 
-    cmd_vel_mux_node = launch_ros.actions.Node(
-        package='cmd_vel_mux',
-        node_executable='cmd_vel_mux_node',
+    ackermann_cmd_mux_node = launch_ros.actions.Node(
+        package='ackermann_cmd_mux',
+        node_executable='ackermann_cmd_mux_node',
         output='both',
         parameters=[params]
     )
 
-    return launch.LaunchDescription([cmd_vel_mux_node])
+    return launch.LaunchDescription([ackermann_cmd_mux_node])
