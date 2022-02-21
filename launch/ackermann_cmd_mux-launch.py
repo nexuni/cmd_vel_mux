@@ -55,7 +55,7 @@ def generate_launch_description():
 
     ackermann_cmd_mux_node = launch_ros.actions.Node(
         package='ackermann_cmd_mux',
-        node_executable='ackermann_cmd_mux_node',
+        executable='ackermann_cmd_mux_node',
         output='both',
         parameters=[params]
     )
