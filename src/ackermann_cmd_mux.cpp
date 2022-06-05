@@ -91,11 +91,11 @@ AckermannCmdMux::AckermannCmdMux(rclcpp::NodeOptions options)
     add_on_set_parameters_callback(std::bind(&AckermannCmdMux::parameterUpdate, this,
       std::placeholders::_1));
 
-  output_topic_pub_ = this->create_publisher<ackermann_msgs::msg::AckermannDriveStamped>("cmd_vel", 10);
+  output_topic_pub_ = this->create_publisher<ackermann_msgs::msg::AckermannDriveStamped>("cmd_vel", rmw_qos_durability_policy_t::RMW_QOS_POLICY_DURABILITY_VOLATILE);
   RCLCPP_DEBUG(get_logger(), "AckermannCmdMux : subscribe to output topic 'cmd_vel'");
 
   active_subscriber_pub_ = this->create_publisher<std_msgs::msg::String>(
-    "active", rclcpp::QoS(1).transient_local());    // latched topic
+    "active", rmw_qos_durability_policy_t::RMW_QOS_POLICY_DURABILITY_VOLATILE);    // latched topic
 
   // Notify the world that right now nobody is publishing on cmd_vel yet
   auto active_msg = std::make_unique<std_msgs::msg::String>();
@@ -190,7 +190,7 @@ void AckermannCmdMux::configureFromParameters(const std::map<std::string, Parame
     const std::string & key = m.first;
     const std::shared_ptr<CmdVelSub> & values = m.second;
     if (!values->sub_) {
-      values->sub_ = this->create_subscription<ackermann_msgs::msg::AckermannDriveStamped>(values->values_.topic, 10,
+      values->sub_ = this->create_subscription<ackermann_msgs::msg::AckermannDriveStamped>(values->values_.topic, rmw_qos_durability_policy_t::RMW_QOS_POLICY_DURABILITY_VOLATILE,
           [this,
           key](const ackermann_msgs::msg::AckermannDriveStamped::SharedPtr msg) {cmdVelCallback(msg, key);});
       RCLCPP_DEBUG(get_logger(), "AckermannCmdMux : subscribed to '%s' on topic '%s'. pr: %d, to: %.2f",
